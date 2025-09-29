@@ -218,7 +218,16 @@ export default function ModuleTemplates() {
       return;
     }
 
-    updateTemplate(showEditTemplate.id, templateData);
+    // Créer le template avec les sous-tâches préservées
+    const templateWithSubTasks = {
+      ...templateData,
+      tasks: showEditTemplate.tasks.map(task => ({
+        name: task.name,
+        subTasks: task.subTasks || []
+      }))
+    };
+
+    updateTemplate(showEditTemplate.id, templateWithSubTasks);
     setShowEditTemplate(null);
     setNameError('');
   };
@@ -253,7 +262,15 @@ export default function ModuleTemplates() {
   };
 
   const handleOpenEditTemplate = (template: ModuleTemplate) => {
-    setShowEditTemplate(template);
+    // Créer une copie profonde du template pour éviter de modifier directement le store
+    const templateCopy = {
+      ...template,
+      tasks: template.tasks.map(task => ({
+        ...task,
+        subTasks: task.subTasks ? [...task.subTasks] : []
+      }))
+    };
+    setShowEditTemplate(templateCopy);
     setNameError('');
     setActiveTab('settings'); // Reset to settings tab
   };
@@ -262,7 +279,7 @@ export default function ModuleTemplates() {
   const addTask = (templateData: any, setTemplateData: any) => {
     setTemplateData({
       ...templateData,
-      tasks: [...templateData.tasks, { name: '' }]
+      tasks: [...templateData.tasks, { name: '', subTasks: [] }]
     });
   };
 
@@ -882,6 +899,11 @@ export default function ModuleTemplates() {
               const task = newTemplateData.tasks[showSubTaskModal.taskIndex];
               return task?.subTasks || [];
             }
+            // Si on est en mode édition, utiliser showEditTemplate au lieu du store
+            if (showEditTemplate && showEditTemplate.id === showSubTaskModal.templateId) {
+              const task = showEditTemplate.tasks[showSubTaskModal.taskIndex];
+              return task?.subTasks || [];
+            }
             const template = templates.find(t => t.id === showSubTaskModal.templateId);
             const task = template?.tasks[showSubTaskModal.taskIndex];
             return task?.subTasks || [];
@@ -899,6 +921,18 @@ export default function ModuleTemplates() {
                 mondaySubItemId: null
               });
               setNewTemplateData({ ...newTemplateData, tasks: updatedTasks });
+            } else if (showEditTemplate && showEditTemplate.id === showSubTaskModal.templateId) {
+              // Handle edit template case - update showEditTemplate directly
+              const updatedTasks = [...showEditTemplate.tasks];
+              if (!updatedTasks[showSubTaskModal.taskIndex].subTasks) {
+                updatedTasks[showSubTaskModal.taskIndex].subTasks = [];
+              }
+              updatedTasks[showSubTaskModal.taskIndex].subTasks.push({
+                ...subTask,
+                id: `subtask_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                mondaySubItemId: null
+              });
+              setShowEditTemplate({ ...showEditTemplate, tasks: updatedTasks });
             } else {
               handleAddSubTask(showSubTaskModal.templateId, showSubTaskModal.taskIndex, subTask);
             }
@@ -918,6 +952,20 @@ export default function ModuleTemplates() {
                 });
               }
               setNewTemplateData({ ...newTemplateData, tasks: updatedTasks });
+            } else if (showEditTemplate && showEditTemplate.id === showSubTaskModal.templateId) {
+              // Handle edit template case - update showEditTemplate directly
+              const updatedTasks = [...showEditTemplate.tasks];
+              const currentSubTasks = updatedTasks[showSubTaskModal.taskIndex].subTasks || [];
+              const subTaskIndex = currentSubTasks.findIndex(st => st.id === subTaskId);
+              if (subTaskIndex !== -1 && updatedTasks[showSubTaskModal.taskIndex].subTasks) {
+                updatedTasks[showSubTaskModal.taskIndex].subTasks = updatedTasks[showSubTaskModal.taskIndex].subTasks.map((st, index) => {
+                  if (index === subTaskIndex) {
+                    return { ...st, ...updates };
+                  }
+                  return st;
+                });
+              }
+              setShowEditTemplate({ ...showEditTemplate, tasks: updatedTasks });
             } else {
               const template = templates.find(t => t.id === showSubTaskModal.templateId);
               const task = template?.tasks[showSubTaskModal.taskIndex];
@@ -937,6 +985,15 @@ export default function ModuleTemplates() {
                 updatedTasks[showSubTaskModal.taskIndex].subTasks = updatedTasks[showSubTaskModal.taskIndex].subTasks.filter((_, index) => index !== subTaskIndex);
               }
               setNewTemplateData({ ...newTemplateData, tasks: updatedTasks });
+            } else if (showEditTemplate && showEditTemplate.id === showSubTaskModal.templateId) {
+              // Handle edit template case - update showEditTemplate directly
+              const updatedTasks = [...showEditTemplate.tasks];
+              const currentSubTasks = updatedTasks[showSubTaskModal.taskIndex].subTasks || [];
+              const subTaskIndex = currentSubTasks.findIndex(st => st.id === subTaskId);
+              if (subTaskIndex !== -1 && updatedTasks[showSubTaskModal.taskIndex].subTasks) {
+                updatedTasks[showSubTaskModal.taskIndex].subTasks = updatedTasks[showSubTaskModal.taskIndex].subTasks.filter((_, index) => index !== subTaskIndex);
+              }
+              setShowEditTemplate({ ...showEditTemplate, tasks: updatedTasks });
             } else {
               const template = templates.find(t => t.id === showSubTaskModal.templateId);
               const task = template?.tasks[showSubTaskModal.taskIndex];
@@ -957,6 +1014,16 @@ export default function ModuleTemplates() {
                 updatedTasks[showSubTaskModal.taskIndex].subTasks = subTasks;
               }
               setNewTemplateData({ ...newTemplateData, tasks: updatedTasks });
+            } else if (showEditTemplate && showEditTemplate.id === showSubTaskModal.templateId) {
+              // Handle edit template case - update showEditTemplate directly
+              const updatedTasks = [...showEditTemplate.tasks];
+              if (updatedTasks[showSubTaskModal.taskIndex].subTasks) {
+                const subTasks = Array.from(updatedTasks[showSubTaskModal.taskIndex].subTasks);
+                const [reorderedSubTask] = subTasks.splice(sourceIndex, 1);
+                subTasks.splice(destinationIndex, 0, reorderedSubTask);
+                updatedTasks[showSubTaskModal.taskIndex].subTasks = subTasks;
+              }
+              setShowEditTemplate({ ...showEditTemplate, tasks: updatedTasks });
             } else {
               handleReorderSubTasks(showSubTaskModal.templateId, showSubTaskModal.taskIndex, sourceIndex, destinationIndex);
             }
