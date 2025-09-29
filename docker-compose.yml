@@ -6,15 +6,25 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - VITE_MONDAY_API_TOKEN=${VITE_MONDAY_API_TOKEN}
+        - VITE_MONDAY_API_ENDPOINT=${VITE_MONDAY_API_ENDPOINT}
+        - VITE_MONDAY_API_VERSION=${VITE_MONDAY_API_VERSION}
+        - VITE_MONDAY_WORKSPACE_ID=${VITE_MONDAY_WORKSPACE_ID}
     container_name: monday-manager-app
     ports:
       - "3010:80"
     volumes:
       - ./data:/opt/data
       - ./logs:/var/log/nginx
+      - ./.env.local:/app/.env.local
     environment:
       - NODE_ENV=production
       - PORT=80
+      - VITE_MONDAY_API_TOKEN=${VITE_MONDAY_API_TOKEN}
+      - VITE_MONDAY_API_ENDPOINT=${VITE_MONDAY_API_ENDPOINT}
+      - VITE_MONDAY_API_VERSION=${VITE_MONDAY_API_VERSION}
+      - VITE_MONDAY_WORKSPACE_ID=${VITE_MONDAY_WORKSPACE_ID}
     restart: unless-stopped
     networks:
       - monday-network
