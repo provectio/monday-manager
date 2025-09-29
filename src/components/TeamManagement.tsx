@@ -4,9 +4,7 @@ import {
   PlusIcon,
   TrashIcon,
   PencilIcon,
-  CheckIcon,
   XMarkIcon,
-  ExclamationTriangleIcon,
   ChartBarIcon
 } from '@heroicons/react/24/outline';
 import { Team, TeamType } from '../types';

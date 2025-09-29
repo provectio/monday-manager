@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DndContext,
@@ -10,7 +10,6 @@ import {
   DragEndEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
@@ -21,7 +20,6 @@ import {
   XMarkIcon,
   PlusIcon,
   TrashIcon,
-  CheckCircleIcon,
   ExclamationTriangleIcon,
   Bars3Icon
 } from '@heroicons/react/24/outline';
@@ -30,12 +28,10 @@ import { SubTask } from '../types';
 // Composant sortable pour les sous-tâches
 function SortableSubTaskItem({ 
   subTask, 
-  index, 
   onUpdateSubTask, 
   onDeleteSubTask 
 }: {
   subTask: SubTask;
-  index: number;
   onUpdateSubTask: (subTaskId: string, field: keyof SubTask, value: any) => void;
   onDeleteSubTask: (subTaskId: string) => void;
 }) {
@@ -249,13 +245,12 @@ export default function SubTaskModal({
                 <div className="space-y-2">
                   <AnimatePresence>
                     {subTasks.map((subTask, index) => (
-                      <SortableSubTaskItem
-                        key={subTask.id}
-                        subTask={subTask}
-                        index={index}
-                        onUpdateSubTask={handleUpdateSubTask}
-                        onDeleteSubTask={handleDeleteSubTask}
-                      />
+                            <SortableSubTaskItem
+                              key={subTask.id}
+                              subTask={subTask}
+                              onUpdateSubTask={handleUpdateSubTask}
+                              onDeleteSubTask={handleDeleteSubTask}
+                            />
                     ))}
                   </AnimatePresence>
                 </div>

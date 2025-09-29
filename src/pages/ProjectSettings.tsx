@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAppStore } from '../store/useAppStore';
 import { useModuleTemplatesStore } from '../store/useModuleTemplatesStore';
-import { Project, ModuleType, ModuleStatus, ProjectStatus } from '../types';
+import { Project, ModuleType, ModuleStatus, ProjectStatus, TeamType } from '../types';
 import TeamModulesManager from '../components/TeamModulesManager';
 import Toast from '../components/Toast';
 
@@ -86,16 +86,17 @@ export default function ProjectSettings() {
       setModulesBeingAdded(prev => new Set(prev).add(moduleName));
       
       // Optimistically update the UI immediately
-      const newModule = {
-        id: `temp_${Date.now()}_${Math.random()}`,
-        name: moduleInfo.name,
-        type: moduleInfo.name as ModuleType,
-        mondayGroupId: `temp_${Date.now()}_${Math.random()}`,
-        color: moduleInfo.color,
-        status: 'not_started' as ModuleStatus,
-        assignedPerson: '',
-        tasks: []
-      };
+            const newModule = {
+              id: `temp_${Date.now()}_${Math.random()}`,
+              name: moduleInfo.name,
+              type: moduleInfo.name as ModuleType,
+              team: moduleInfo.team,
+              mondayGroupId: `temp_${Date.now()}_${Math.random()}`,
+              color: moduleInfo.color,
+              status: 'not_started' as ModuleStatus,
+              assignedPerson: '',
+              tasks: []
+            };
 
       // Update local state immediately
       setProject(prev => ({
@@ -148,7 +149,7 @@ export default function ProjectSettings() {
     }
   };
 
-  const handleRemoveModule = (moduleId: string) => {
+  const handleRemoveModule = async (moduleId: string) => {
     const module = project?.modules.find(m => m.id === moduleId);
     if (module) {
       setShowModuleDeleteConfirm({ id: moduleId, name: module.name });
@@ -163,9 +164,12 @@ export default function ProjectSettings() {
       const newTask = {
         id: `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: newTaskNames[moduleId].trim(),
-        status: 'pending' as const,
+        itemId: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        mondayItemId: null,
+        status: 'todo' as const,
         assignedPerson: '',
-        dueDate: null
+        dueDate: undefined,
+        subTasks: []
       };
 
       await updateModuleInProject(project.id, moduleId, {
@@ -282,16 +286,17 @@ export default function ProjectSettings() {
         // Rollback: add module back to UI
         setProject(prev => ({
           ...prev!,
-          modules: [...prev!.modules, {
-            id: moduleToDelete.id,
-            name: moduleName,
-            type: 'Infrastructure' as ModuleType,
-            mondayGroupId: moduleToDelete.id,
-            color: '#3B82F6',
-            status: 'not_started' as ModuleStatus,
-            assignedPerson: '',
-            tasks: []
-          }]
+              modules: [...prev!.modules, {
+                id: moduleToDelete.id,
+                name: moduleName,
+                type: 'Infrastructure' as ModuleType,
+                team: 'Infrastructure' as TeamType,
+                mondayGroupId: moduleToDelete.id,
+                color: '#3B82F6',
+                status: 'not_started' as ModuleStatus,
+                assignedPerson: '',
+                tasks: []
+              }]
         }));
         
         // Remove from being deleted state
@@ -338,7 +343,7 @@ export default function ProjectSettings() {
       navigate('/');
       
       // Archive project in background (don't await) - pass project data directly
-      archiveProject(project.id, project.mondayBoardId).catch(error => {
+      archiveProject(project.id).catch(error => {
         console.error('Error archiving project in background:', error);
         // Optionally show a toast notification here
       });

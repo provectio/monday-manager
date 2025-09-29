@@ -35,7 +35,7 @@ interface AppStore extends AppState {
   projectsCache: Project[] | null;
   lastCacheUpdate: number | null;
   isRefreshing: boolean;
-  syncInterval: NodeJS.Timeout | null;
+  syncInterval: any;
   
   // Actions
   setProjects: (projects: Project[]) => void;
@@ -45,7 +45,7 @@ interface AppStore extends AppState {
   setApiStatus: (status: ApiStatus) => void;
   setTheme: (theme: Theme) => void;
   setLoading: (loading: boolean) => void;
-  setError: (error: string | undefined) => void;
+  setError: (error: string | null) => void;
   clearError: () => void;
   loadProjectsFromMonday: (useCache?: boolean) => Promise<void>;
   refreshProjectsInBackground: () => Promise<void>;
@@ -111,7 +111,7 @@ export const useAppStore = create<AppStore>()(
                  mode: 'light',
                },
                isLoading: false,
-               error: undefined,
+               error: null,
 
       // Actions
       setProjects: (projects) => set({ projects }),
@@ -138,7 +138,7 @@ export const useAppStore = create<AppStore>()(
       
       setError: (error) => set({ error }),
       
-      clearError: () => set({ error: undefined }),
+      clearError: () => set({ error: null }),
 
       // Load projects from Monday.com with cache support
       loadProjectsFromMonday: async (useCache = true) => {
@@ -159,7 +159,7 @@ export const useAppStore = create<AppStore>()(
         }
         
         try {
-          set({ isLoading: true, error: undefined });
+          set({ isLoading: true, error: null });
           
           // Check if workspace ID is configured
           const workspaceId = import.meta.env.VITE_MONDAY_WORKSPACE_ID;
@@ -592,7 +592,7 @@ export const useAppStore = create<AppStore>()(
       // Add module to project
       addModuleToProject: async (projectId: string, moduleName: string) => {
         try {
-          set({ isLoading: true, error: undefined });
+          set({ isLoading: true, error: null });
           
           const project = get().projects.find(p => p.id === projectId);
           if (!project) {
@@ -719,7 +719,7 @@ export const useAppStore = create<AppStore>()(
       // Remove module from project
       removeModuleFromProject: async (projectId: string, moduleId: string) => {
         try {
-          set({ isLoading: true, error: undefined });
+          set({ isLoading: true, error: null });
           
           const project = get().projects.find(p => p.id === projectId);
           if (!project) {
@@ -768,7 +768,7 @@ export const useAppStore = create<AppStore>()(
       // Update module in project
       updateModuleInProject: async (projectId: string, moduleId: string, updates: Partial<Module>) => {
         try {
-          set({ isLoading: true, error: undefined });
+          set({ isLoading: true, error: null });
           
           const project = get().projects.find(p => p.id === projectId);
           if (!project) {
@@ -814,7 +814,7 @@ export const useAppStore = create<AppStore>()(
       // Refresh project data from Monday.com
       refreshProject: async (projectId: string) => {
         try {
-          set({ isLoading: true, error: undefined });
+          set({ isLoading: true, error: null });
           
           const project = get().projects.find(p => p.id === projectId);
           if (!project) {
@@ -891,7 +891,7 @@ export const useAppStore = create<AppStore>()(
         // Archive project
         archiveProject: async (projectId: string, mondayBoardId?: string) => {
           try {
-            set({ isLoading: true, error: undefined });
+            set({ isLoading: true, error: null });
             
             // Use provided mondayBoardId or find project in store
             let boardId = mondayBoardId;
@@ -928,7 +928,7 @@ export const useAppStore = create<AppStore>()(
       // Add sub-task to task
       addSubTaskToTask: async (projectId: string, moduleId: string, taskId: string, subTask) => {
         try {
-          set({ isLoading: true, error: undefined });
+          set({ isLoading: true, error: null });
           
           const state = get();
           const project = state.projects.find(p => p.id === projectId);
@@ -1051,7 +1051,7 @@ export const useAppStore = create<AppStore>()(
       // Update sub-task in task
       updateSubTaskInTask: async (projectId: string, moduleId: string, taskId: string, subTaskId: string, updates) => {
         try {
-          set({ isLoading: true, error: undefined });
+          set({ isLoading: true, error: null });
           
           const state = get();
           const project = state.projects.find(p => p.id === projectId);
@@ -1131,7 +1131,7 @@ export const useAppStore = create<AppStore>()(
       // Remove sub-task from task
       removeSubTaskFromTask: async (projectId: string, moduleId: string, taskId: string, subTaskId: string) => {
         try {
-          set({ isLoading: true, error: undefined });
+          set({ isLoading: true, error: null });
           
           const state = get();
           const project = state.projects.find(p => p.id === projectId);

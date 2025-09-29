@@ -6,22 +6,18 @@ import {
   ArrowRightIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  TagIcon
 } from '@heroicons/react/24/outline';
 import { useAppStore } from '../store/useAppStore';
 import { useModuleTemplatesStore } from '../store/useModuleTemplatesStore';
 import { useTeamsStore } from '../store/useTeamsStore';
-import { ModuleType, TeamType } from '../types';
+import { TeamType } from '../types';
 import TeamSelector from '../components/TeamSelector';
 import TeamModulesGrid from '../components/TeamModulesGrid';
-import TeamCard from '../components/TeamCard';
-import TeamModulesSelector from '../components/TeamModulesSelector';
 
 export default function CreateProject() {
   const navigate = useNavigate();
   const { createProject } = useAppStore();
   const { templates, getTemplatesByTeam } = useModuleTemplatesStore();
-  const { teams } = useTeamsStore();
   
   const [currentStep, setCurrentStep] = useState(1);
   const [projectName, setProjectName] = useState('');
@@ -73,11 +69,12 @@ export default function CreateProject() {
         return template?.name || id;
       });
 
-      const projectData = {
-        name: projectName,
-        description: projectDescription,
-        modules: selectedTemplateNames
-      };
+            const projectData = {
+              name: projectName,
+              salesforceNumber: `SF-${Date.now()}`, // Generate a temporary Salesforce number
+              description: projectDescription,
+              modules: selectedTemplateNames
+            };
 
       // Show success message immediately
       setProjectCreated(true);

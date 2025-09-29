@@ -1,10 +1,9 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   TrashIcon,
   PlusIcon,
   CheckIcon,
-  Squares2X2Icon
 } from '@heroicons/react/24/outline';
 import { Project, Module, TeamType } from '../types';
 import { useTeamsStore } from '../store/useTeamsStore';
@@ -255,6 +254,7 @@ export default function TeamModulesManager({
           onAddSubTask={(taskId, subTask) => onAddSubTask(showSubTaskModal.moduleId, taskId, subTask)}
           onUpdateSubTask={(taskId, subTaskId, updates) => onUpdateSubTask(showSubTaskModal.moduleId, taskId, subTaskId, updates)}
           onDeleteSubTask={(taskId, subTaskId) => onDeleteSubTask(showSubTaskModal.moduleId, taskId, subTaskId)}
+          onReorderSubTasks={() => {}}
           loading={loading}
         />
       )}

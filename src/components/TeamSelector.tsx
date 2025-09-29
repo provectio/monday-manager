@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { TagIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { CheckIcon } from '@heroicons/react/24/outline';
 import { TeamType } from '../types';
 import { useTeamsStore } from '../store/useTeamsStore';
 

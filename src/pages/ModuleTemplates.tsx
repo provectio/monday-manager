@@ -144,7 +144,7 @@ export default function ModuleTemplates() {
     color: '#579bfc', // Bleu (Monday.com compatible)
     icon: '🏗️',
     team: 'Infrastructure' as TeamType,
-    tasks: [{ name: '' }]
+            tasks: [{ name: '', subTasks: [] }]
   });
   const [nameError, setNameError] = useState('');
   const [selectedTeam, setSelectedTeam] = useState<TeamType | null>(null);
@@ -192,7 +192,7 @@ export default function ModuleTemplates() {
       color: '#579bfc',
       icon: '🏗️',
       team: 'Infrastructure' as TeamType,
-      tasks: [{ name: '' }]
+            tasks: [{ name: '', subTasks: [] }]
     });
     setNameError('');
   };
@@ -246,7 +246,7 @@ export default function ModuleTemplates() {
       color: '#579bfc',
       icon: '🏗️',
       team: 'Infrastructure' as TeamType,
-      tasks: [{ name: '' }]
+            tasks: [{ name: '', subTasks: [] }]
     });
     setShowAddTemplate(true);
     setNameError('');
