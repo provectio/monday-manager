@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # Application principale
+  monday-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: monday-manager-app
+    ports:
+      - "3010:80"
+    volumes:
+      - ./data:/opt/data
+      - ./logs:/var/log/nginx
+    environment:
+      - NODE_ENV=production
+      - PORT=80
+    restart: unless-stopped
+    networks:
+      - monday-network
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis pour le cache et les sessions
+  redis:
+    image: redis:7-alpine
+    container_name: monday-manager-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+    networks:
+      - monday-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Base de données PostgreSQL (optionnel, pour les données persistantes)
+  postgres:
+    image: postgres:15-alpine
+    container_name: monday-manager-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=monday_manager
+      - POSTGRES_USER=monday_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-monday_secure_password}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks:
+      - monday-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U monday_user -d monday_manager"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Monitoring avec Prometheus (optionnel)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: monday-manager-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - monday-network
+
+  # Grafana pour les dashboards (optionnel)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: monday-manager-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - monday-network
+    depends_on:
+      - prometheus
+
+volumes:
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+networks:
+  monday-network:
+    driver: bridge
+
