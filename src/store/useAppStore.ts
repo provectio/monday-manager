@@ -903,10 +903,12 @@ export const useAppStore = create<AppStore>()(
               isLoading: false
             }));
 
-            // Force reload projects to reflect the archive (in background)
-            get().loadProjectsFromMonday(false).catch(error => {
+            // Force immediate reload projects to reflect the archive
+            try {
+              await get().loadProjectsFromMonday(false);
+            } catch (error) {
               console.error('Error reloading projects after archive:', error);
-            });
+            }
         } catch (error) {
           console.error('Error archiving project:', error);
           set({ 

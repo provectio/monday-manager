@@ -337,11 +337,8 @@ export default function ProjectSettings() {
       setShowArchiveConfirm(false);
       navigate('/');
       
-      // Archive project in background (don't await) - pass mondayBoardId directly
-      archiveProject(project.id, project.mondayBoardId).catch(error => {
-        console.error('Error archiving project in background:', error);
-        // Optionally show a toast notification here
-      });
+      // Archive project and wait for completion to ensure UI is updated
+      await archiveProject(project.id, project.mondayBoardId);
       
     } catch (error) {
       setError('Erreur lors de l\'archivage du projet');
