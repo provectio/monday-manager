@@ -414,18 +414,7 @@ export const useAppStore = create<AppStore>()(
             syncStatus: 'synced'
           };
 
-          // Create custom columns for Status and Assigned Person
-          try {
-            await mondayApi.createColumn(boardResult.create_board.id, 'Statut', 'status');
-          } catch (error) {
-            console.error('Error creating Status column:', error);
-          }
-
-          try {
-            await mondayApi.createColumn(boardResult.create_board.id, 'Personne', 'people');
-          } catch (error) {
-            console.error('Error creating Person column:', error);
-          }
+          // Columns are already created in mondayApi.createBoard() - no need to create them again
 
           // Create groups (modules) in Monday.com
           for (const moduleName of projectData.modules) {
@@ -906,15 +895,18 @@ export const useAppStore = create<AppStore>()(
             // Archive board in Monday.com
             await mondayApi.archiveBoard(boardId);
 
-            // Invalidate cache to ensure fresh data on next load
+            // Remove project from local store immediately
             set((state) => ({
-              projectsCache: null,
+              projects: state.projects.filter(p => p.id !== projectId),
+              projectsCache: null, // Invalidate cache
               lastCacheUpdate: null,
               isLoading: false
             }));
 
-            // Force reload projects to reflect the archive
-            await get().loadProjectsFromMonday(false);
+            // Force reload projects to reflect the archive (in background)
+            get().loadProjectsFromMonday(false).catch(error => {
+              console.error('Error reloading projects after archive:', error);
+            });
         } catch (error) {
           console.error('Error archiving project:', error);
           set({ 

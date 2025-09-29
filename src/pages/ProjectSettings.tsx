@@ -333,17 +333,12 @@ export default function ProjectSettings() {
     try {
       setLoading(true);
       
-      // Remove project immediately from local state for better UX
-      const { projects, setProjects } = useAppStore.getState();
-      const updatedProjects = projects.filter(p => p.id !== project.id);
-      setProjects(updatedProjects);
-      
-      // Close modal and navigate immediately
+      // Close modal and navigate immediately for better UX
       setShowArchiveConfirm(false);
       navigate('/');
       
-      // Archive project in background (don't await) - pass project data directly
-      archiveProject(project.id).catch(error => {
+      // Archive project in background (don't await) - pass mondayBoardId directly
+      archiveProject(project.id, project.mondayBoardId).catch(error => {
         console.error('Error archiving project in background:', error);
         // Optionally show a toast notification here
       });
